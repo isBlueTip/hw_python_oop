@@ -160,29 +160,39 @@ def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные, полученные от датчиков
     и создать объект соответствующего класса."""
 
-    workout_dict = {'SWM': Swimming,  # Dict to decipher a workout code from fitness-module
+    # Dict to decipher a workout code from fitness-module
+    workout_dict = {'SWM': Swimming,
                     'RUN': Running,
                     'WLK': SportsWalking
                     }
 
-    workout_session = workout_dict[workout_type](*data)  # The creation of Training class instance
+    # The creation of Training class instance
+    workout_session = workout_dict[workout_type](*data)
     return workout_session  # Return a workout instance
 
 
 def main(training: Training) -> None:
     """Главная функция."""
 
-    info = training.show_training_info()  # The creation of MessageInfo class instance for a specific workout
-    print(info.get_message())  # Print str of human-readable data for a corresponding Training instance
+    # The creation of MessageInfo class instance for a specific workout
+    info = training.show_training_info()
+    # Print str of human-readable data for a corresponding Training instance
+    print(info.get_message())
 
 
 if __name__ == '__main__':
     packages = [
-        ('SWM', [720, 1, 80, 25, 40]),  # количество гребков, время в часах, вес пользователя, длина бассейна, сколько раз пользователь переплыл бассейн.
-        ('RUN', [15000, 1, 75]),  # количество шагов, время тренировки в часах, вес пользователя.
-        ('WLK', [9000, 1, 75, 180]),  # количество шагов, время тренировки в часах, вес пользователя, рост пользователя.
+        # количество гребков, время в часах, вес пользователя,
+        # длина бассейна, сколько раз пользователь переплыл бассейн
+        ('SWM', [720, 1, 80, 25, 40]),
+        # количество шагов, время тренировки в часах, вес пользователя.
+        ('RUN', [15000, 1, 75]),
+        # количество шагов, время тренировки в часах,
+        # вес пользователя, рост пользователя.
+        ('WLK', [9000, 1, 75, 180]),
     ]
 
     for workout_type, data in packages:
         training = read_package(workout_type, data)
-        main(training)  # Passing of Training class instance to the main function
+        # Passing of Training class instance to the main function
+        main(training)
