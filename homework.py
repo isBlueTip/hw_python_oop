@@ -1,11 +1,15 @@
 
+MINS_IN_HOUR = 60  # minutes in one hour
+# M_IN_KM = 1000  # meters in one kilometer
+
+
 class InfoMessage:
     """Информационное сообщение о тренировке."""
-    workout_type_dict = {'Swimming': 'плавание',
-                         'Running': 'бег',
-                         'SportsWalking': 'спортивная ходьба'
-
-                         }
+    # workout_type_dict = {'Swimming': 'плавание',
+    #                      'Running': 'бег',
+    #                      'SportsWalking': 'спортивная ходьба'
+    #
+    #                      }
 
     def __init__(self,
                  training_type: str,
@@ -20,11 +24,13 @@ class InfoMessage:
         self.speed = speed
         self.calories = calories
 
-    def show(self):
-        """Method for creating human readable str with data."""
+    def get_message(self):
+        """Method for creating human readable
+        str for a specific workout."""
 
         return (f'Тип тренировки: '
-                f'{self.workout_type_dict [self.training_type]}; '
+                # f'{self.workout_type_dict [self.training_type]}; '
+                f'{self.training_type}; '
                 f'Длительность: {self.duration:.3f} ч.; '
                 f'Дистанция: {self.distance:.3f} км; '
                 f'Ср. скорость: {self.speed:.3f} км/ч; '
@@ -50,7 +56,7 @@ class Training:
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
 
-        return self.action * self.LEN_STEP / self.M_IN_KM
+        return (self.action * self.LEN_STEP) / self.M_IN_KM
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
@@ -83,10 +89,13 @@ class Running(Training):
     def get_spent_calories(self) -> float:
         """Count calories burnt during the session."""
 
-        return ((18 * self.get_mean_speed() - 20)
+        run_cal_coeff_1 = 18
+        run_cal_coeff_2 = 20
+        return ((run_cal_coeff_1 * self.get_mean_speed()
+                 - run_cal_coeff_2)
                 * self.weight
                 / self.M_IN_KM
-                * self.duration * 60
+                * self.duration * MINS_IN_HOUR
                 )
 
 
@@ -103,9 +112,13 @@ class SportsWalking(Training):
     def get_spent_calories(self) -> float:
         """Count calories burnt during the session."""
 
-        return ((0.035 * self.weight
-                 + (self.get_mean_speed()**2 // self.height)
-                 * 0.029 * self.weight) * self.duration * 60
+        walk_cal_coeff_1 = 0.035
+        walk_cal_coeff_2 = 2
+        walk_cal_coeff_3 = 0.029
+        return ((walk_cal_coeff_1 * self.weight
+                + (self.get_mean_speed()**walk_cal_coeff_2 // self.height)
+                * walk_cal_coeff_3 * self.weight)
+                * self.duration * MINS_IN_HOUR
                 )
 
 
@@ -126,48 +139,41 @@ class Swimming(Training):
     def get_mean_speed(self) -> float:
         """Count average speed during the session."""
 
-        return (self.length_pool
-                * self.count_pool
-                / self.M_IN_KM
+        return (((self.length_pool
+                * self.count_pool)
+                / self.M_IN_KM)
                 / self.duration
                 )
 
     def get_spent_calories(self) -> float:
         """Count calories burnt during the session."""
 
-        return (self.get_mean_speed() + 1.1) * 2 * self.weight
+        swm_cal_coeff_1 = 1.1
+        swm_cal_coeff_2 = 2
+        return ((self.get_mean_speed()
+                + swm_cal_coeff_1)
+                * swm_cal_coeff_2
+                * self.weight)
 
 
 def read_package(workout_type: str, data: list) -> Training:
-    """Прочитать данные полученные от датчиков."""
+    """Прочитать данные, полученные от датчиков
+    и создать объект соответствующего класса."""
 
-    workout_dict = {'SWM': Swimming,
+    workout_dict = {'SWM': Swimming,  # Dict to decipher a workout code from fitness-module
                     'RUN': Running,
                     'WLK': SportsWalking
                     }
-    workout_session = Training
 
-    # Check for workout type to pass different number
-    # of arguments to the TODO use *data for [] unpacking
-    # corresponding class TODO and replace all the if-elif!
-
-    if workout_type == 'SWM':
-        workout_session = workout_dict[workout_type](data[0], data[1],
-                                                     data[2], data[3], data[4])
-    elif workout_type == 'RUN':
-        workout_session = workout_dict[workout_type](data[0], data[1],
-                                                     data[2])
-    elif workout_type == 'WLK':
-        workout_session = workout_dict[workout_type](data[0], data[1],
-                                                     data[2], data[3])
-    return workout_session
+    workout_session = workout_dict[workout_type](*data)  # The creation of Training class instance
+    return workout_session  # Return a workout instance
 
 
 def main(training: Training) -> None:
     """Главная функция."""
 
-    info = training.show_training_info()
-    print(info.show())
+    info = training.show_training_info()  # The creation of MessageInfo class instance for a specific workout
+    print(info.get_message())  # Print str of human-readable data for a corresponding Training instance
 
 
 if __name__ == '__main__':
@@ -179,4 +185,4 @@ if __name__ == '__main__':
 
     for workout_type, data in packages:
         training = read_package(workout_type, data)
-        main(training)
+        main(training)  # Passing of Training class instance to the main function
