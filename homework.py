@@ -1,15 +1,17 @@
 
-MINS_IN_HOUR = 60  # minutes in one hour
-# M_IN_KM = 1000  # meters in one kilometer
+from typing import Dict, Type
+
+MINS_IN_HOUR = 60
 
 
 class InfoMessage:
     """Информационное сообщение о тренировке."""
-    # workout_type_dict = {'Swimming': 'плавание',
-    #                      'Running': 'бег',
-    #                      'SportsWalking': 'спортивная ходьба'
-    #
-    #                      }
+
+    TRAINING_INFO_MESSAGE = 'Тип тренировки: {0.training_type}; ' \
+                            'Длительность: {0.duration:.3f} ч.; ' \
+                            'Дистанция: {0.distance:.3f} км; ' \
+                            'Ср. скорость: {0.speed:.3f} км/ч; ' \
+                            'Потрачено ккал: {0.calories:.3f}.'
 
     def __init__(self,
                  training_type: str,
@@ -28,14 +30,7 @@ class InfoMessage:
         """Method for creating human readable
         str for a specific workout."""
 
-        return (f'Тип тренировки: '
-                # f'{self.workout_type_dict [self.training_type]}; '
-                f'{self.training_type}; '
-                f'Длительность: {self.duration:.3f} ч.; '
-                f'Дистанция: {self.distance:.3f} км; '
-                f'Ср. скорость: {self.speed:.3f} км/ч; '
-                f'Потрачено ккал: {self.calories:.3f}.'
-                )
+        return self.TRAINING_INFO_MESSAGE.format(self)
 
 
 class Training:
@@ -63,10 +58,14 @@ class Training:
 
         return self.get_distance() / self.duration
 
-    def get_spent_calories(self) -> float:
-        """Получить количество затраченных калорий."""
+    def get_spent_calories(self) -> None:
+        """Get calories spent during a workout.
+        The method must be overridden in every child class."""
 
-        pass
+        raise NotImplementedError('get_spent_calories()'
+                                  'must be defined in %s class'
+                                  % type(self).__name__
+                                  )
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -81,6 +80,9 @@ class Training:
 class Running(Training):
     """Тренировка: бег."""
 
+    RUN_CAL_COEFF_1 = 18
+    RUN_CAL_COEFF_2 = 20
+
     def __init__(self, action: int,
                  duration: float,
                  weight: float) -> None:
@@ -89,10 +91,8 @@ class Running(Training):
     def get_spent_calories(self) -> float:
         """Count calories burnt during the session."""
 
-        run_cal_coeff_1 = 18
-        run_cal_coeff_2 = 20
-        return ((run_cal_coeff_1 * self.get_mean_speed()
-                 - run_cal_coeff_2)
+        return ((self.RUN_CAL_COEFF_1 * self.get_mean_speed()
+                 - self.RUN_CAL_COEFF_2)
                 * self.weight
                 / self.M_IN_KM
                 * self.duration * MINS_IN_HOUR
@@ -101,6 +101,10 @@ class Running(Training):
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
+
+    WALK_CAL_COEFF_1 = 0.035
+    WALK_CAL_COEFF_2 = 2
+    WALK_CAL_COEFF_3 = 0.029
 
     def __init__(self, action: int,
                  duration: float,
@@ -112,12 +116,9 @@ class SportsWalking(Training):
     def get_spent_calories(self) -> float:
         """Count calories burnt during the session."""
 
-        walk_cal_coeff_1 = 0.035
-        walk_cal_coeff_2 = 2
-        walk_cal_coeff_3 = 0.029
-        return ((walk_cal_coeff_1 * self.weight
-                + (self.get_mean_speed()**walk_cal_coeff_2 // self.height)
-                * walk_cal_coeff_3 * self.weight)
+        return ((self.WALK_CAL_COEFF_1 * self.weight
+                + (self.get_mean_speed()**self.WALK_CAL_COEFF_2 // self.height)
+                * self.WALK_CAL_COEFF_3 * self.weight)
                 * self.duration * MINS_IN_HOUR
                 )
 
@@ -126,6 +127,8 @@ class Swimming(Training):
     """Тренировка: плавание."""
 
     LEN_STEP = 1.38  # meters in one stroke
+    SWM_CAL_COEFF_1 = 1.1
+    SWM_CAL_COEFF_2 = 2
 
     def __init__(self, action: int,
                  duration: float,
@@ -148,11 +151,9 @@ class Swimming(Training):
     def get_spent_calories(self) -> float:
         """Count calories burnt during the session."""
 
-        swm_cal_coeff_1 = 1.1
-        swm_cal_coeff_2 = 2
         return ((self.get_mean_speed()
-                + swm_cal_coeff_1)
-                * swm_cal_coeff_2
+                + self.SWM_CAL_COEFF_1)
+                * self.SWM_CAL_COEFF_2
                 * self.weight)
 
 
@@ -161,14 +162,24 @@ def read_package(workout_type: str, data: list) -> Training:
     и создать объект соответствующего класса."""
 
     # Dict to decipher a workout code from fitness-module
-    workout_dict = {'SWM': Swimming,
-                    'RUN': Running,
-                    'WLK': SportsWalking
-                    }
+    workout_dict_type = Dict[str, Type[Training]]
+    workout_dict: workout_dict_type = {'SWM': Swimming,
+                                       'RUN': Running,
+                                       'WLK': SportsWalking
+                                       }
 
     # The creation of Training class instance
-    workout_session = workout_dict[workout_type](*data)
-    return workout_session  # Return a workout instance
+    try:
+        workout_session = workout_dict[workout_type](*data)
+    except KeyError:
+        print(f'Sorry. <{workout_type}> is undefined workout type.')
+    except TypeError:
+        print(f'Sorry, an error has occurred. Please check '
+              f'that the correct number of data elements  '
+              f'is passed to <{workout_dict[workout_type].__name__}> '
+              f'class instance.')
+    else:
+        return workout_session
 
 
 def main(training: Training) -> None:
