@@ -1,8 +1,10 @@
 from typing import Dict, Type
+from dataclasses import dataclass, asdict
 
 MINS_IN_HOUR = 60
 
 
+@dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
 
@@ -13,40 +15,28 @@ class InfoMessage:
                              'Потрачено ккал: {0.calories:.3f}.'
                              )
 
-    def __init__(self,
-                 training_type: str,
-                 duration: float,
-                 distance: float,
-                 speed: float,
-                 calories: float
-                 ) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self):
         """Method for creating human readable
         str for a specific workout."""
-
         return self.TRAINING_INFO_MESSAGE.format(self)
 
 
+@dataclass
 class Training:
     """Базовый класс тренировки."""
 
     LEN_STEP = 0.65  # meters in one step
     M_IN_KM = 1000  # meters in one kilometer
 
-    def __init__(self,
-                 action: int,
-                 duration: float,
-                 weight: float,
-                 ) -> None:
-        self.action = action
-        self.duration = duration
-        self.weight = weight
+    action: int
+    duration: float
+    weight: float
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -58,7 +48,7 @@ class Training:
 
         return self.get_distance() / self.duration
 
-    def get_spent_calories(self) -> None:
+    def get_spent_calories(self):
         """Get calories spent during a workout.
         The method must be overridden in every child class."""
 
@@ -77,16 +67,16 @@ class Training:
                            self.get_spent_calories())
 
 
+@dataclass
 class Running(Training):
     """Тренировка: бег."""
 
     RUN_CAL_COEFF_1 = 18
     RUN_CAL_COEFF_2 = 20
 
-    def __init__(self, action: int,
-                 duration: float,
-                 weight: float) -> None:
-        super().__init__(action, duration, weight)
+    action: int
+    duration: float
+    weight: float
 
     def get_spent_calories(self) -> float:
         """Count calories burnt during the session."""
@@ -99,6 +89,7 @@ class Running(Training):
                 )
 
 
+@dataclass
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
 
@@ -106,12 +97,10 @@ class SportsWalking(Training):
     WALK_CAL_COEFF_2 = 2
     WALK_CAL_COEFF_3 = 0.029
 
-    def __init__(self, action: int,
-                 duration: float,
-                 weight: float,
-                 height: int,) -> None:
-        super().__init__(action, duration, weight)
-        self.height = height
+    action: int
+    duration: float
+    weight: float
+    height: int
 
     def get_spent_calories(self) -> float:
         """Count calories burnt during the session."""
@@ -123,6 +112,7 @@ class SportsWalking(Training):
                 )
 
 
+@dataclass
 class Swimming(Training):
     """Тренировка: плавание."""
 
@@ -130,14 +120,11 @@ class Swimming(Training):
     SWM_CAL_COEFF_1 = 1.1
     SWM_CAL_COEFF_2 = 2
 
-    def __init__(self, action: int,
-                 duration: float,
-                 weight: float,
-                 length_pool: int,
-                 count_pool: int) -> None:
-        super().__init__(action, duration, weight)
-        self.length_pool = length_pool
-        self.count_pool = count_pool
+    action: int
+    duration: float
+    weight: float
+    length_pool: int
+    count_pool: int
 
     def get_mean_speed(self) -> float:
         """Count average speed during the session."""
@@ -169,14 +156,15 @@ def read_package(workout_type: str, data: list) -> Training:
                                        }
 
     # The creation of Training class instance
+    workout_class = workout_dict.get(workout_type)
+    if workout_class is None:
+        raise KeyError(f'Sorry. <{workout_type}> is undefined workout type.')
     try:
-        workout_session = workout_dict[workout_type](*data)
-    except KeyError:
-        print(f'Sorry. <{workout_type}> is undefined workout type.')
+        workout_session = workout_class(*data)
     except TypeError:
         print(f'Sorry, an error has occurred. Please check '
               f'that the correct number of data elements  '
-              f'is passed to <{workout_dict[workout_type].__name__}> '
+              f'is passed to <{workout_dict.get(workout_type).__name__}> '
               f'class instance.')
     else:
         return workout_session
