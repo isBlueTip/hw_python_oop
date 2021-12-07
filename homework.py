@@ -1,4 +1,3 @@
-
 from typing import Dict, Type
 
 MINS_IN_HOUR = 60
@@ -7,11 +6,12 @@ MINS_IN_HOUR = 60
 class InfoMessage:
     """Информационное сообщение о тренировке."""
 
-    TRAINING_INFO_MESSAGE = 'Тип тренировки: {0.training_type}; ' \
-                            'Длительность: {0.duration:.3f} ч.; ' \
-                            'Дистанция: {0.distance:.3f} км; ' \
-                            'Ср. скорость: {0.speed:.3f} км/ч; ' \
-                            'Потрачено ккал: {0.calories:.3f}.'
+    TRAINING_INFO_MESSAGE = ('Тип тренировки: {0.training_type}; '
+                             'Длительность: {0.duration:.3f} ч.; '
+                             'Дистанция: {0.distance:.3f} км; '
+                             'Ср. скорость: {0.speed:.3f} км/ч; '
+                             'Потрачено ккал: {0.calories:.3f}.'
+                             )
 
     def __init__(self,
                  training_type: str,
@@ -92,7 +92,7 @@ class Running(Training):
         """Count calories burnt during the session."""
 
         return ((self.RUN_CAL_COEFF_1 * self.get_mean_speed()
-                 - self.RUN_CAL_COEFF_2)
+                - self.RUN_CAL_COEFF_2)
                 * self.weight
                 / self.M_IN_KM
                 * self.duration * MINS_IN_HOUR
