@@ -1,5 +1,5 @@
 from typing import Dict, Type
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 MINS_IN_HOUR = 60
 
