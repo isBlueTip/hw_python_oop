@@ -6,7 +6,7 @@ MINS_IN_HOUR = 60
 
 @dataclass
 class InfoMessage:
-    """Информационное сообщение о тренировке."""
+    """Info message about training."""
 
     TRAINING_INFO_MESSAGE = ('Тип тренировки: {0.training_type}; '
                              'Длительность: {0.duration:.3f} ч.; '
@@ -29,7 +29,7 @@ class InfoMessage:
 
 @dataclass
 class Training:
-    """Базовый класс тренировки."""
+    """Basic training class."""
 
     LEN_STEP = 0.65  # meters in one step
     M_IN_KM = 1000  # meters in one kilometer
@@ -39,12 +39,12 @@ class Training:
     weight: float
 
     def get_distance(self) -> float:
-        """Получить дистанцию в км."""
+        """Get distance in km."""
 
         return (self.action * self.LEN_STEP) / self.M_IN_KM
 
     def get_mean_speed(self) -> float:
-        """Получить среднюю скорость движения."""
+        """Get average moving speed."""
 
         return self.get_distance() / self.duration
 
@@ -58,7 +58,7 @@ class Training:
                                   )
 
     def show_training_info(self) -> InfoMessage:
-        """Вернуть информационное сообщение о выполненной тренировке."""
+        """Retrieve info message about completed training."""
 
         return InfoMessage(type(self).__name__,
                            self.duration,
@@ -69,7 +69,7 @@ class Training:
 
 @dataclass
 class Running(Training):
-    """Тренировка: бег."""
+    """Training type: running."""
 
     RUN_CAL_COEFF_1 = 18
     RUN_CAL_COEFF_2 = 20
@@ -91,7 +91,7 @@ class Running(Training):
 
 @dataclass
 class SportsWalking(Training):
-    """Тренировка: спортивная ходьба."""
+    """Training type: sport walking."""
 
     WALK_CAL_COEFF_1 = 0.035
     WALK_CAL_COEFF_2 = 2
@@ -114,7 +114,7 @@ class SportsWalking(Training):
 
 @dataclass
 class Swimming(Training):
-    """Тренировка: плавание."""
+    """Training type: swimming."""
 
     LEN_STEP = 1.38  # meters in one stroke
     SWM_CAL_COEFF_1 = 1.1
@@ -145,8 +145,8 @@ class Swimming(Training):
 
 
 def read_package(workout_type: str, data: list) -> Training:
-    """Прочитать данные, полученные от датчиков
-    и создать объект соответствующего класса."""
+    """Read the data from sensors
+    and create a class's object."""
 
     # Dict to decipher a workout code from fitness-module
     workout_dict_type = Dict[str, Type[Training]]
@@ -171,7 +171,7 @@ def read_package(workout_type: str, data: list) -> Training:
 
 
 def main(training: Training) -> None:
-    """Главная функция."""
+    """The main func."""
 
     # The creation of MessageInfo class instance for a specific workout
     info = training.show_training_info()
