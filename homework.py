@@ -181,13 +181,12 @@ def main(training: Training) -> None:
 
 if __name__ == '__main__':
     packages = [
-        # количество гребков, время в часах, вес пользователя,
-        # длина бассейна, сколько раз пользователь переплыл бассейн
+        # num_of_strokes, time_in_hrs, user_weight,
+        # pool_len, num_of_pools_covered
         ('SWM', [720, 1, 80, 25, 40]),
-        # количество шагов, время тренировки в часах, вес пользователя.
+        # num_of_steps, time_in_hrs, user_weight
         ('RUN', [15000, 1, 75]),
-        # количество шагов, время тренировки в часах,
-        # вес пользователя, рост пользователя.
+        # num_of_steps, time_in_hrs, user_weight, user_len
         ('WLK', [9000, 1, 75, 180]),
     ]
 
